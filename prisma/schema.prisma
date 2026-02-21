@@ -1,0 +1,128 @@
+// Fleet & Logistics Management System - Prisma Schema
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  DISPATCHER
+  VIEWER
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      UserRole
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum VehicleType {
+  Truck
+  Van
+  Bike
+}
+
+enum VehicleStatus {
+  Available
+  OnTrip
+  InShop
+  Retired
+}
+
+model Vehicle {
+  id             String        @id @default(cuid())
+  name           String
+  model          String
+  licensePlate   String        @unique
+  type           VehicleType
+  region         String
+  maxCapacity    Float
+  odometer       Float         @default(0)
+  status         VehicleStatus @default(Available)
+  acquisitionCost Float?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  trips          Trip[]
+  maintenanceLogs MaintenanceLog[]
+  fuelLogs       FuelLog[]
+}
+
+enum DriverStatus {
+  OnDuty
+  OffDuty
+  Suspended
+  OnTrip
+}
+
+model Driver {
+  id           String       @id @default(cuid())
+  name         String
+  licenseType  String
+  licenseExpiry DateTime
+  safetyScore  Float        @default(100)
+  status       DriverStatus @default(OffDuty)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  trips        Trip[]
+}
+
+enum TripStatus {
+  Draft
+  Dispatched
+  Completed
+  Cancelled
+}
+
+model Trip {
+  id             String     @id @default(cuid())
+  vehicleId      String
+  driverId       String
+  cargoWeight    Float
+  origin         String
+  destination    String
+  startOdometer  Float?
+  endOdometer    Float?
+  revenue        Float?
+  status         TripStatus @default(Draft)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  vehicle        Vehicle    @relation(fields: [vehicleId], references: [id], onDelete: Restrict)
+  driver         Driver     @relation(fields: [driverId], references: [id], onDelete: Restrict)
+
+  @@index([vehicleId])
+  @@index([driverId])
+  @@index([status])
+}
+
+model MaintenanceLog {
+  id        String   @id @default(cuid())
+  vehicleId String
+  description String
+  cost      Float
+  date      DateTime
+  createdAt DateTime @default(now())
+  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@index([vehicleId])
+}
+
+model FuelLog {
+  id        String   @id @default(cuid())
+  vehicleId String
+  liters    Float
+  cost      Float
+  date      DateTime
+  createdAt DateTime @default(now())
+  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@index([vehicleId])
+}
