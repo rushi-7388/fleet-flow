@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select } from '@/components/ui/select';
+import { Truck } from 'lucide-react';
 
 const ROLES = ['VIEWER', 'DISPATCHER', 'MANAGER', 'ADMIN'] as const;
 
@@ -56,16 +58,22 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/30 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>FleetFlow</CardTitle>
-          <CardDescription>Create a new account</CardDescription>
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4">
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,hsl(var(--primary)/0.12),transparent)]" />
+      <Card className="w-full max-w-md border-border/80 shadow-elevated">
+        <CardHeader className="space-y-4 pb-2">
+          <div className="flex items-center justify-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+              <Truck className="h-6 w-6 text-primary" />
+            </div>
+            <CardTitle className="text-2xl">FleetFlow</CardTitle>
+          </div>
+          <CardDescription className="text-center">Create a new account</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</div>
+              <div className="rounded-lg border border-destructive/20 bg-destructive/10 px-3 py-2.5 text-sm text-destructive">{error}</div>
             )}
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
@@ -102,16 +110,15 @@ export default function RegisterPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="role">Role</Label>
-              <select
+              <Select
                 id="role"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
               >
                 {ROLES.map((r) => (
                   <option key={r} value={r}>{r}</option>
                 ))}
-              </select>
+              </Select>
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? 'Creating account...' : 'Create account'}
@@ -119,7 +126,7 @@ export default function RegisterPage() {
           </form>
           <p className="mt-4 text-center text-sm text-muted-foreground">
             Already have an account?{' '}
-            <Link href="/login" className="text-primary underline underline-offset-4">Sign in</Link>
+            <Link href="/login" className="text-primary font-medium hover:underline underline-offset-4">Sign in</Link>
           </p>
         </CardContent>
       </Card>

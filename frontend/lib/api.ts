@@ -82,9 +82,12 @@ export interface Trip {
 export interface MaintenanceLog {
   id: string;
   vehicleId: string;
+  serviceType?: string;
   description: string;
   cost: number;
   date: string;
+  nextServiceDue?: string | null;
+  status?: string;
   vehicle?: { name: string; licensePlate: string };
 }
 
@@ -95,6 +98,18 @@ export interface FuelLog {
   cost: number;
   date: string;
   vehicle?: { name: string; licensePlate: string };
+}
+
+export interface Expense {
+  id: string;
+  vehicleId: string;
+  tripId?: string | null;
+  expenseType: string;
+  amount: number;
+  date: string;
+  description?: string | null;
+  vehicle?: { id: string; name: string; licensePlate: string };
+  trip?: { id: string; origin: string; destination: string } | null;
 }
 
 // Analytics
@@ -112,4 +127,16 @@ export interface MonthlySummary {
   maintenanceCost: number;
   tripsCount: number;
   totalCargo: number;
+}
+
+export interface DashboardFleetRow {
+  vehicleId: string;
+  vehicleName: string;
+  licensePlate: string;
+  type: string;
+  region: string;
+  status: string;
+  driverName: string | null;
+  location: string | null;
+  load: number | null;
 }

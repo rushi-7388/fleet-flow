@@ -6,11 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select } from '@/components/ui/select';
 import { StatusPill } from '@/components/StatusPill';
 import { useAuthStore } from '@/store/authStore';
 
 export default function TripsPage() {
-  const canDispatch = useAuthStore((s) => s.hasRole('ADMIN', 'MANAGER', 'DISPATCHER'));
+  const canDispatch = useAuthStore((s) => s.hasRole('ADMIN', 'DISPATCHER'));
   const [trips, setTrips] = useState<Trip[]>([]);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [drivers, setDrivers] = useState<Driver[]>([]);
@@ -145,8 +146,11 @@ export default function TripsPage() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Trips</h1>
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Trips</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Create and manage trip dispatches</p>
+        </div>
         {canDispatch && (
           <Button onClick={() => { setFormOpen(true); setRuleError(''); setSubmitError(''); }}>
             New trip
@@ -154,7 +158,7 @@ export default function TripsPage() {
         )}
       </div>
       {submitError && (
-        <div className="mb-4 rounded-md border border-destructive/50 bg-destructive/10 px-4 py-2 text-sm text-destructive">
+        <div className="mb-6 rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {submitError}
         </div>
       )}
@@ -165,35 +169,27 @@ export default function TripsPage() {
             <Button variant="ghost" size="sm" onClick={() => setFormOpen(false)}>Close</Button>
           </CardHeader>
           <CardContent>
-            {ruleError && <p className="mb-2 text-sm text-destructive">{ruleError}</p>}
+            {ruleError && <p className="mb-4 rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">{ruleError}</p>}
             <form onSubmit={handleCreate} className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>Vehicle (available only)</Label>
-                <select
-                  className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                  value={form.vehicleId}
-                  onChange={(e) => setForm((f) => ({ ...f, vehicleId: e.target.value }))}
-                >
+                <Select value={form.vehicleId} onChange={(e) => setForm((f) => ({ ...f, vehicleId: e.target.value }))}>
                   <option value="">Select vehicle</option>
                   {availableVehicles.map((v) => (
                     <option key={v.id} value={v.id}>{v.name} – {v.licensePlate} (max {v.maxCapacity} kg)</option>
                   ))}
                   {availableVehicles.length === 0 && <option value="" disabled>No available vehicles</option>}
-                </select>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label>Driver (on duty, valid license)</Label>
-                <select
-                  className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                  value={form.driverId}
-                  onChange={(e) => setForm((f) => ({ ...f, driverId: e.target.value }))}
-                >
+                <Select value={form.driverId} onChange={(e) => setForm((f) => ({ ...f, driverId: e.target.value }))}>
                   <option value="">Select driver</option>
                   {validDrivers.map((d) => (
                     <option key={d.id} value={d.id}>{d.name} ({d.licenseType})</option>
                   ))}
                   {validDrivers.length === 0 && <option value="" disabled>No on-duty drivers with valid license</option>}
-                </select>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label>Cargo weight (kg)</Label>
@@ -221,72 +217,72 @@ export default function TripsPage() {
       <Card>
         <CardHeader className="flex flex-row flex-wrap items-center gap-4">
           <CardTitle className="text-lg">Trips</CardTitle>
-          <select
-            className="h-10 rounded-md border border-input bg-background px-3 text-sm"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
+          <Select className="w-40" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
             <option value="">All statuses</option>
             <option value="Draft">Draft</option>
             <option value="Dispatched">Dispatched</option>
             <option value="Completed">Completed</option>
             <option value="Cancelled">Cancelled</option>
-          </select>
+          </Select>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <p className="text-muted-foreground">Loading...</p>
+            <div className="flex items-center justify-center py-12">
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full text-sm table-hover">
                 <thead>
-                  <tr className="border-b">
-                    <th className="pb-3 text-left font-medium">Origin → Dest.</th>
-                    <th className="pb-3 text-left font-medium">Vehicle</th>
-                    <th className="pb-3 text-left font-medium">Driver</th>
-                    <th className="pb-3 text-left font-medium">Cargo</th>
-                    <th className="pb-3 text-left font-medium">Status</th>
-                    {canDispatch && <th className="pb-3 text-left font-medium">Actions</th>}
+                  <tr className="border-b border-border/80">
+                    <th className="pb-3 text-left font-medium text-muted-foreground">Origin → Dest.</th>
+                    <th className="pb-3 text-left font-medium text-muted-foreground">Vehicle</th>
+                    <th className="pb-3 text-left font-medium text-muted-foreground">Driver</th>
+                    <th className="pb-3 text-left font-medium text-muted-foreground">Cargo</th>
+                    <th className="pb-3 text-left font-medium text-muted-foreground">Status</th>
+                    {canDispatch && <th className="pb-3 text-left font-medium text-muted-foreground">Dispatch / Complete</th>}
                   </tr>
                 </thead>
                 <tbody>
                   {trips.map((t) => (
-                    <tr key={t.id} className="border-b last:border-0">
-                      <td className="py-3">{t.origin} → {t.destination}</td>
+                    <tr key={t.id} className="border-b border-border/50 last:border-0">
+                      <td className="py-3 font-medium">{t.origin} → {t.destination}</td>
                       <td className="py-3">{t.vehicle?.name ?? t.vehicleId}</td>
                       <td className="py-3">{t.driver?.name ?? t.driverId}</td>
                       <td className="py-3">{t.cargoWeight}</td>
                       <td className="py-3"><StatusPill status={t.status} /></td>
                       {canDispatch && (
-                        <td className="py-3 flex gap-2">
-                          {t.status === 'Draft' && <Button size="sm" onClick={() => handleDispatch(t.id)}>Dispatch</Button>}
-                          {t.status === 'Dispatched' && (
-                            completingId === t.id ? (
-                              <span className="flex items-center gap-2">
-                                <Input
-                                  type="number"
-                                  placeholder="End km"
-                                  className="h-8 w-24"
-                                  value={completeEndOdo}
-                                  onChange={(e) => setCompleteEndOdo(e.target.value)}
-                                />
-                                <Button size="sm" onClick={() => handleComplete(t.id)}>Confirm</Button>
-                                <Button size="sm" variant="ghost" onClick={() => { setCompletingId(null); setCompleteEndOdo(''); }}>Cancel</Button>
-                              </span>
-                            ) : (
-                              <Button size="sm" variant="outline" onClick={() => setCompletingId(t.id)}>Complete</Button>
-                            )
-                          )}
-                          {(t.status === 'Draft' || t.status === 'Dispatched') && (
-                            <Button size="sm" variant="destructive" onClick={() => handleCancel(t.id)}>Cancel</Button>
-                          )}
+                        <td className="py-3">
+                          <div className="flex flex-wrap gap-2">
+                            {t.status === 'Draft' && <Button size="sm" onClick={() => handleDispatch(t.id)}>Dispatch</Button>}
+                            {t.status === 'Dispatched' && (
+                              completingId === t.id ? (
+                                <span className="flex items-center gap-2">
+                                  <Input
+                                    type="number"
+                                    placeholder="End km"
+                                    className="h-8 w-24"
+                                    value={completeEndOdo}
+                                    onChange={(e) => setCompleteEndOdo(e.target.value)}
+                                  />
+                                  <Button size="sm" onClick={() => handleComplete(t.id)}>Confirm</Button>
+                                  <Button size="sm" variant="ghost" onClick={() => { setCompletingId(null); setCompleteEndOdo(''); }}>Cancel</Button>
+                                </span>
+                              ) : (
+                                <Button size="sm" variant="outline" onClick={() => setCompletingId(t.id)}>Complete</Button>
+                              )
+                            )}
+                            {(t.status === 'Draft' || t.status === 'Dispatched') && (
+                              <Button size="sm" variant="destructive" onClick={() => handleCancel(t.id)}>Cancel</Button>
+                            )}
+                          </div>
                         </td>
                       )}
                     </tr>
                   ))}
                 </tbody>
               </table>
-              {trips.length === 0 && <p className="py-4 text-center text-muted-foreground">No trips found.</p>}
+              {trips.length === 0 && <p className="py-12 text-center text-muted-foreground">No trips found.</p>}
             </div>
           )}
         </CardContent>

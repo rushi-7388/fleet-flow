@@ -59,6 +59,8 @@ Node.js + Express + TypeScript backend with Prisma, PostgreSQL, JWT auth, and RB
    npm run prisma:seed
    ```
 
+   **Demo data:** The seed creates users (`admin@fleetflow.com` / `admin123`), 3 vehicles (Van-05, Truck-01, Bike-01), and 2 drivers (Alex OnDuty, Maria OffDuty). Use these to create trips from the dashboard.
+
 4. **Run**
 
    ```bash

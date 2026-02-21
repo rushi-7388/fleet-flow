@@ -1,23 +1,18 @@
 {
-  "name": "fleet-flow-backend",
+  "name": "fleet-flow",
   "version": "1.0.0",
   "description": "ERP-style Fleet & Logistics Management System API",
   "main": "dist/server.js",
   "scripts": {
+    "dev": "ts-node src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "prisma:seed": "ts-node prisma/seed.ts"
   },
-  "keywords": [
-    "fleet",
-    "logistics",
-    "erp",
-    "api"
-  ],
+  "keywords": ["fleet", "logistics", "erp", "api"],
   "license": "MIT",
   "dependencies": {
     "@prisma/client": "^5.22.0",

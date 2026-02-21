@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Truck } from 'lucide-react';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -15,8 +16,6 @@ export default function ForgotPasswordPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // In a real app, this would call an API endpoint
-    // For hackathon demo, we'll simulate success
     setTimeout(() => {
       setSubmitted(true);
       setLoading(false);
@@ -25,15 +24,21 @@ export default function ForgotPasswordPage() {
 
   if (submitted) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-muted/30 p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle>Check your email</CardTitle>
-            <CardDescription>Password reset instructions have been sent</CardDescription>
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4">
+        <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,hsl(var(--primary)/0.12),transparent)]" />
+        <Card className="w-full max-w-md border-border/80 shadow-elevated">
+          <CardHeader className="space-y-4 pb-2">
+            <div className="flex items-center justify-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+                <Truck className="h-6 w-6 text-primary" />
+              </div>
+            </div>
+            <CardTitle className="text-center">Check your email</CardTitle>
+            <CardDescription className="text-center">Password reset instructions have been sent</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              If an account exists for <strong>{email}</strong>, you will receive password reset instructions.
+            <p className="mb-4 text-sm text-muted-foreground">
+              If an account exists for <strong className="text-foreground">{email}</strong>, you will receive password reset instructions.
             </p>
             <Link href="/login">
               <Button className="w-full">Back to Login</Button>
@@ -45,11 +50,17 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/30 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>FleetFlow</CardTitle>
-          <CardDescription>Reset your password</CardDescription>
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4">
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,hsl(var(--primary)/0.12),transparent)]" />
+      <Card className="w-full max-w-md border-border/80 shadow-elevated">
+        <CardHeader className="space-y-4 pb-2">
+          <div className="flex items-center justify-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+              <Truck className="h-6 w-6 text-primary" />
+            </div>
+            <CardTitle className="text-2xl">FleetFlow</CardTitle>
+          </div>
+          <CardDescription className="text-center">Reset your password</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -69,7 +80,7 @@ export default function ForgotPasswordPage() {
             </Button>
             <p className="text-center text-sm text-muted-foreground">
               Remember your password?{' '}
-              <Link href="/login" className="text-primary underline underline-offset-4">Sign in</Link>
+              <Link href="/login" className="text-primary font-medium hover:underline underline-offset-4">Sign in</Link>
             </p>
           </form>
         </CardContent>

@@ -44,6 +44,18 @@ export interface FuelEfficiencySeriesItem {
   totalDistance: number;
 }
 
+export interface DashboardFleetRow {
+  vehicleId: string;
+  vehicleName: string;
+  licensePlate: string;
+  type: string;
+  region: string;
+  status: string;
+  driverName: string | null;
+  location: string | null;
+  load: number | null;
+}
+
 const safeDiv = (a: number, b: number): number | null => {
   if (b === 0 || !Number.isFinite(b)) return null;
   const q = a / b;
@@ -211,6 +223,131 @@ export const analyticsService = {
       const utilizationRate = totalVehicles === 0 ? 0 : Math.round((active / totalVehicles) * 100);
       return { month, utilizationRate, activeVehicles: active, totalVehicles };
     });
+  },
+
+  async getDashboardFleetOverview(filters: {
+    type?: string;
+    status?: string;
+    region?: string;
+  }): Promise<DashboardFleetRow[]> {
+    const where: Record<string, unknown> = { status: { not: 'Retired' } };
+    if (filters.type) where.type = filters.type;
+    if (filters.status) where.status = filters.status;
+    if (filters.region) where.region = { contains: filters.region, mode: 'insensitive' };
+
+    const vehicles = await prisma.vehicle.findMany({
+      where,
+      include: {
+        trips: {
+          where: { status: 'Dispatched' },
+          take: 1,
+          orderBy: { updatedAt: 'desc' },
+          include: { driver: { select: { name: true } } },
+        },
+      },
+    });
+
+    return vehicles.map((v) => {
+      const activeTrip = v.trips[0];
+      return {
+        vehicleId: v.id,
+        vehicleName: v.name,
+        licensePlate: v.licensePlate,
+        type: v.type,
+        region: v.region,
+        status: v.status,
+        driverName: activeTrip?.driver?.name ?? null,
+        location: activeTrip ? `${activeTrip.origin} → ${activeTrip.destination}` : null,
+        load: activeTrip?.cargoWeight ?? null,
+      };
+    });
+  },
+
+  async getFuelEfficiencyTrend(startDate?: Date, endDate?: Date): Promise<{ month: string; kmPerL: number }[]> {
+    const start = startDate ?? new Date();
+    start.setDate(start.getDate() - 90);
+    const end = endDate ?? new Date();
+
+    const fuelLogs = await prisma.fuelLog.findMany({
+      where: { date: { gte: start, lte: end } },
+      select: { liters: true, date: true, vehicleId: true },
+    });
+    const trips = await prisma.trip.findMany({
+      where: { status: 'Completed', createdAt: { gte: start, lte: end } },
+      select: { vehicleId: true, startOdometer: true, endOdometer: true, createdAt: true },
+    });
+
+    const monthKey = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    const map = new Map<string, { liters: number; km: number }>();
+
+    fuelLogs.forEach((f) => {
+      const key = monthKey(f.date);
+      if (!map.has(key)) map.set(key, { liters: 0, km: 0 });
+      map.get(key)!.liters += f.liters;
+    });
+    trips.forEach((t) => {
+      const km = Math.max(0, (t.endOdometer ?? 0) - (t.startOdometer ?? 0));
+      const key = monthKey(t.createdAt);
+      if (!map.has(key)) map.set(key, { liters: 0, km: 0 });
+      map.get(key)!.km += km;
+    });
+
+    return Array.from(map.entries())
+      .map(([month, row]) => ({
+        month,
+        kmPerL: row.liters > 0 ? Math.round((row.km / row.liters) * 10) / 10 : 0,
+      }))
+      .sort((a, b) => a.month.localeCompare(b.month));
+  },
+
+  async getTopOperationalCosts(limit = 5, startDate?: Date, endDate?: Date): Promise<{ label: string; value: number }[]> {
+    const start = startDate ?? new Date();
+    start.setDate(start.getDate() - 30);
+    const end = endDate ?? new Date();
+
+    const [fuelLogs, maintenanceLogs, expenses] = await Promise.all([
+      prisma.fuelLog.findMany({ where: { date: { gte: start, lte: end } }, select: { cost: true } }),
+      prisma.maintenanceLog.findMany({ where: { date: { gte: start, lte: end } }, select: { cost: true } }),
+      prisma.expense.findMany({ where: { date: { gte: start, lte: end } }, select: { amount: true, expenseType: true } }),
+    ]);
+
+    const fuelTotal = fuelLogs.reduce((s, f) => s + f.cost, 0);
+    const maintenanceTotal = maintenanceLogs.reduce((s, m) => s + m.cost, 0);
+    const byType = new Map<string, number>();
+    expenses.forEach((e) => {
+      byType.set(e.expenseType, (byType.get(e.expenseType) ?? 0) + e.amount);
+    });
+
+    const items: { label: string; value: number }[] = [
+      { label: 'Fuel', value: fuelTotal },
+      { label: 'Maintenance', value: maintenanceTotal },
+      ...Array.from(byType.entries()).map(([label, value]) => ({ label, value })),
+    ];
+    return items.sort((a, b) => b.value - a.value).slice(0, limit);
+  },
+
+  async getOperationalSummaryReport(startDate?: Date, endDate?: Date): Promise<{ metric: string; value: string; dateGenerated: string }[]> {
+    const end = endDate ?? new Date();
+    const start = startDate ?? new Date();
+    start.setDate(start.getDate() - 30);
+
+    const kpis = await this.getDashboardKpis();
+    const [fuelLogs, maintenanceLogs] = await Promise.all([
+      prisma.fuelLog.findMany({ where: { date: { gte: start, lte: end } }, select: { cost: true } }),
+      prisma.maintenanceLog.findMany({ where: { date: { gte: start, lte: end } }, select: { cost: true } }),
+    ]);
+    const totalFuel = fuelLogs.reduce((s, f) => s + f.cost, 0);
+    const totalMaintenance = maintenanceLogs.reduce((s, m) => s + m.cost, 0);
+
+    const dateGenerated = new Date().toISOString().split('T')[0];
+    return [
+      { metric: 'Active Fleet', value: String(kpis.activeFleet), dateGenerated },
+      { metric: 'Maintenance Alerts', value: String(kpis.maintenanceAlerts), dateGenerated },
+      { metric: 'Utilization Rate (%)', value: String(kpis.utilizationRate), dateGenerated },
+      { metric: 'Pending Cargo (kg)', value: String(kpis.pendingCargo), dateGenerated },
+      { metric: 'Total Fuel Cost (period)', value: totalFuel.toFixed(2), dateGenerated },
+      { metric: 'Total Maintenance Cost (period)', value: totalMaintenance.toFixed(2), dateGenerated },
+    ];
   },
 
   async getFuelEfficiencyByVehicle(): Promise<FuelEfficiencySeriesItem[]> {

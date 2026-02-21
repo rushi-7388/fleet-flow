@@ -17,7 +17,8 @@ router.use(authMiddleware);
 router.get('/', vehicleController.list);
 router.get('/:id', validate(vehicleIdParamSchema.shape.params, 'params'), vehicleController.getOne);
 
-router.use(requireRoles(UserRole.ADMIN, UserRole.MANAGER, UserRole.DISPATCHER));
+// Fleet Manager & Admin only: asset CRUD. Dispatcher can only read (for trip assignment).
+router.use(requireRoles(UserRole.ADMIN, UserRole.MANAGER));
 
 router.post('/', validate(createVehicleSchema.shape.body), vehicleController.create);
 router.patch(

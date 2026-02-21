@@ -1,3 +1,4 @@
+/// <reference path="../types/express.d.ts" />
 import { Request, Response, NextFunction } from 'express';
 import { UserRole } from '@prisma/client';
 
@@ -12,7 +13,7 @@ export function requireRoles(...allowedRoles: UserRole[]) {
       return;
     }
 
-    if (!allowedRoles.includes(req.userRole)) {
+    if (!allowedRoles.includes(req.userRole as UserRole)) {
       res.status(403).json({
         error: 'Insufficient permissions',
         required: allowedRoles,

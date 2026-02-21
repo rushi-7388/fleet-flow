@@ -20,7 +20,8 @@ router.use(authMiddleware);
 router.get('/', tripController.list);
 router.get('/:id', validate(tripIdParamSchema.shape.params, 'params'), tripController.getOne);
 
-router.use(requireRoles(UserRole.ADMIN, UserRole.MANAGER, UserRole.DISPATCHER));
+// Dispatcher & Admin only: create/dispatch/complete/cancel. Fleet Manager can only read (scheduling oversight).
+router.use(requireRoles(UserRole.ADMIN, UserRole.DISPATCHER));
 
 router.post('/', validate(createTripSchema.shape.body), tripController.create);
 router.patch(

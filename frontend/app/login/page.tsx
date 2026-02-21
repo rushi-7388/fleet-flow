@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Truck } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -51,26 +52,32 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/30 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>FleetFlow</CardTitle>
-          <CardDescription>Sign in to your account</CardDescription>
-          <p className="text-xs text-muted-foreground">
-            Demo: admin@fleetflow.com / admin123
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4">
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,hsl(var(--primary)/0.12),transparent)]" />
+      <Card className="w-full max-w-md border-border/80 shadow-elevated">
+        <CardHeader className="space-y-4 pb-2">
+          <div className="flex items-center justify-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+              <Truck className="h-6 w-6 text-primary" />
+            </div>
+            <CardTitle className="text-2xl">FleetFlow</CardTitle>
+          </div>
+          <CardDescription className="text-center">Sign in to your account</CardDescription>
+          <p className="text-center text-xs text-muted-foreground">
+            {/* Demo: admin@fleetflow.com / admin123 */}
           </p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</div>
+              <div className="rounded-lg border border-destructive/20 bg-destructive/10 px-3 py-2.5 text-sm text-destructive">{error}</div>
             )}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@fleetflow.com"
+                // placeholder="admin@fleetflow.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -90,12 +97,12 @@ export default function LoginPage() {
               {loading ? 'Signing in...' : 'Sign in'}
             </Button>
             <div className="flex items-center justify-between text-sm">
-              <Link href="/forgot-password" className="text-primary underline underline-offset-4">
-                Forgot Password?
+              <Link href="/forgot-password" className="text-primary hover:underline underline-offset-4">
+                {/* Forgot Password? */}
               </Link>
               <span className="text-muted-foreground">
                 No account?{' '}
-                <Link href="/register" className="text-primary underline underline-offset-4">Create one</Link>
+                <Link href="/register" className="text-primary font-medium hover:underline underline-offset-4">Create one</Link>
               </span>
             </div>
           </form>

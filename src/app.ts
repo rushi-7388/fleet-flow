@@ -7,6 +7,7 @@ import driverRoutes from './routes/driverRoutes';
 import tripRoutes from './routes/tripRoutes';
 import maintenanceLogRoutes from './routes/maintenanceLogRoutes';
 import fuelLogRoutes from './routes/fuelLogRoutes';
+import expenseRoutes from './routes/expenseRoutes';
 import analyticsRoutes from './routes/analyticsRoutes';
 import reportRoutes from './routes/reportRoutes';
 import { errorHandler } from './middleware/errorHandler';
@@ -36,6 +37,7 @@ app.use('/api/drivers', driverRoutes);
 app.use('/api/trips', tripRoutes);
 app.use('/api/maintenance-logs', maintenanceLogRoutes);
 app.use('/api/fuel-logs', fuelLogRoutes);
+app.use('/api/expenses', expenseRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/reports', reportRoutes);
 

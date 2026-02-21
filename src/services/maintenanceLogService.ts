@@ -31,9 +31,13 @@ export const maintenanceLogService = {
     const log = await prisma.maintenanceLog.create({
       data: {
         vehicleId: data.vehicleId,
+        serviceType: (data as { serviceType?: string }).serviceType ?? 'Repair',
         description: data.description,
         cost: data.cost,
         date: toDate(data.date as string | Date),
+        nextServiceDue: (data as { nextServiceDue?: string | Date | null }).nextServiceDue
+          ? toDate((data as { nextServiceDue: string | Date }).nextServiceDue)
+          : null,
       },
       include: { vehicle: { select: { id: true, name: true, licensePlate: true } } },
     });
@@ -47,15 +51,25 @@ export const maintenanceLogService = {
   },
 
   async update(id: string, data: UpdateMaintenanceLogInput) {
-    await this.findById(id);
-    return prisma.maintenanceLog.update({
+    const log = await this.findById(id);
+    const updated = await prisma.maintenanceLog.update({
       where: { id },
       data: {
         ...data,
         date: data.date ? toDate(data.date as string | Date) : undefined,
+        nextServiceDue: data.nextServiceDue !== undefined
+          ? (data.nextServiceDue == null ? null : toDate(data.nextServiceDue as string | Date))
+          : undefined,
       },
       include: { vehicle: { select: { id: true, name: true, licensePlate: true } } },
     });
+    if ((data as { status?: string }).status === 'Completed') {
+      await prisma.vehicle.update({
+        where: { id: log.vehicleId },
+        data: { status: 'Available' },
+      });
+    }
+    return updated;
   },
 
   async delete(id: string) {

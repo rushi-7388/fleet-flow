@@ -7,7 +7,7 @@ import { UserRole } from '@prisma/client';
 const router = Router();
 
 router.use(authMiddleware);
-router.use(requireRoles(UserRole.ADMIN, UserRole.MANAGER, UserRole.DISPATCHER));
+router.use(requireRoles(UserRole.ADMIN, UserRole.MANAGER, UserRole.DISPATCHER, UserRole.VIEWER));
 
 // Trips report (query: startDate, endDate, vehicleId, driverId)
 router.get('/trips/export/csv', reportController.exportTripsCSV);

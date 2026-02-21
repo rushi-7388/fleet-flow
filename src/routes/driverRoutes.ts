@@ -17,7 +17,8 @@ router.use(authMiddleware);
 router.get('/', driverController.list);
 router.get('/:id', validate(driverIdParamSchema.shape.params, 'params'), driverController.getOne);
 
-router.use(requireRoles(UserRole.ADMIN, UserRole.MANAGER, UserRole.DISPATCHER));
+// Fleet Manager & Admin only (Safety/Compliance). Dispatcher can only read (for trip assignment).
+router.use(requireRoles(UserRole.ADMIN, UserRole.MANAGER));
 
 router.post('/', validate(createDriverSchema.shape.body), driverController.create);
 router.patch(

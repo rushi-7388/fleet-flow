@@ -21,7 +21,8 @@ router.get(
   fuelLogController.getOne
 );
 
-router.use(requireRoles(UserRole.ADMIN, UserRole.MANAGER, UserRole.DISPATCHER));
+// Fleet Manager & Admin only: fuel/expense logging.
+router.use(requireRoles(UserRole.ADMIN, UserRole.MANAGER));
 
 router.post('/', validate(createFuelLogSchema.shape.body), fuelLogController.create);
 router.patch(

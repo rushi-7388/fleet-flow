@@ -21,7 +21,8 @@ router.get(
   maintenanceLogController.getOne
 );
 
-router.use(requireRoles(UserRole.ADMIN, UserRole.MANAGER, UserRole.DISPATCHER));
+// Fleet Manager & Admin only: service logs (vehicle → In Shop).
+router.use(requireRoles(UserRole.ADMIN, UserRole.MANAGER));
 
 router.post('/', validate(createMaintenanceLogSchema.shape.body), maintenanceLogController.create);
 router.patch(

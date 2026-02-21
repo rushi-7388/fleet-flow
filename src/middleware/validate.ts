@@ -11,7 +11,7 @@ export function validate<T>(schema: ZodSchema<T, ZodTypeDef, unknown>, target: V
       next(result.error);
       return;
     }
-    (req as Record<string, unknown>)[target] = result.data;
+    (req as unknown as Record<string, unknown>)[target] = result.data;
     next();
   };
 }
