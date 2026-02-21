@@ -6,9 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { StatusPill } from '@/components/StatusPill';
-import { Plus } from 'lucide-react';
+import { Plus, Power } from 'lucide-react';
+import { useAuthStore } from '@/store/authStore';
 
 export default function VehiclesPage() {
+  const canEdit = useAuthStore((s) => s.hasRole('ADMIN', 'MANAGER', 'DISPATCHER'));
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('');
@@ -22,6 +24,16 @@ export default function VehiclesPage() {
     if (typeFilter) params.set('type', typeFilter);
     if (regionFilter) params.set('region', regionFilter);
     api.get<Vehicle[]>(`/vehicles?${params}`).then((r) => setVehicles(r.data)).finally(() => setLoading(false));
+  };
+
+  const toggleOutOfService = async (vehicle: Vehicle) => {
+    const newStatus = vehicle.status === 'Retired' ? 'Available' : 'Retired';
+    try {
+      await api.patch(`/vehicles/${vehicle.id}`, { status: newStatus });
+      load();
+    } catch (err) {
+      console.error('Failed to update vehicle status', err);
+    }
   };
 
   useEffect(() => { load(); }, [statusFilter, typeFilter, regionFilter]);
@@ -80,6 +92,7 @@ export default function VehiclesPage() {
                     <th className="pb-3 text-left font-medium">Max cap.</th>
                     <th className="pb-3 text-left font-medium">Odometer</th>
                     <th className="pb-3 text-left font-medium">Status</th>
+                    {canEdit && <th className="pb-3 text-left font-medium">Actions</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -92,6 +105,19 @@ export default function VehiclesPage() {
                       <td className="py-3">{v.maxCapacity}</td>
                       <td className="py-3">{v.odometer}</td>
                       <td className="py-3"><StatusPill status={v.status} /></td>
+                      {canEdit && (
+                        <td className="py-3">
+                          <Button
+                            variant={v.status === 'Retired' ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => toggleOutOfService(v)}
+                            className="gap-2"
+                          >
+                            <Power className="h-3 w-3" />
+                            {v.status === 'Retired' ? 'Activate' : 'Out of Service'}
+                          </Button>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>

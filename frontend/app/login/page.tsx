@@ -89,10 +89,15 @@ export default function LoginPage() {
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? 'Signing in...' : 'Sign in'}
             </Button>
-            <p className="text-center text-sm text-muted-foreground">
-              No account?{' '}
-              <Link href="/register" className="text-primary underline underline-offset-4">Create one</Link>
-            </p>
+            <div className="flex items-center justify-between text-sm">
+              <Link href="/forgot-password" className="text-primary underline underline-offset-4">
+                Forgot Password?
+              </Link>
+              <span className="text-muted-foreground">
+                No account?{' '}
+                <Link href="/register" className="text-primary underline underline-offset-4">Create one</Link>
+              </span>
+            </div>
           </form>
         </CardContent>
       </Card>
